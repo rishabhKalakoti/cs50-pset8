@@ -88,8 +88,40 @@ function addMarker(place)
     });
 
     // load articles in info window upon label click
-    google.maps.event.addListener(marker, 'click', function() 
-        { showInfo(marker, place.place_name + "," + place.admin_code1); });
+    google.maps.event.addListener(marker, "click", function() {
+	showInfo(marker);
+	$.getJSON("articles.php", {
+	    geo: place.postal_code
+	})
+	.done(function(data, textStatus, jqXHR) 
+	{
+	    // if there is no news, tell user no news
+	    if (data.length === 0)
+	    {
+		showInfo(marker, "No News.");
+	    }
+	    // else if there is news, displays news in unordered list
+	    else
+	    {
+		// start unordered list
+		var content = "<ul>";	
+
+        // iterate through the news array
+		for (var i = 0, n = data.length; i < n; i++)
+		{
+		    // add the respective news
+		    content += "<li><a href='" + data[i].link + "' target = '_blank'>" + data[i].title + "</a></li>";
+		}
+
+		// end unordered list
+		content += "</ul>";	
+		
+		// show news
+		showInfo(marker, content);
+	    }
+	});
+    });
+
 
     // add marker to global markers array
     markers.push(marker);
