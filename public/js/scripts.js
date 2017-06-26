@@ -48,8 +48,8 @@ $(function() {
     // options for map
     // https://developers.google.com/maps/documentation/javascript/reference#MapOptions
     var options = {
-        center: {lat: 42.3770, lng: -71.1256}, // Cambridge
-        disableDefaultUI: true,
+        center: {lat: 42.3770, lng: -71.1256}, // Cambridge, Massachusetts
+        disableDefaultUI: true, 
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         maxZoom: 14,
         panControl: true,
@@ -74,8 +74,27 @@ $(function() {
  */
 function addMarker(place)
 {
-    // TODO
+    // store place's latitute and longitude in a variable
+    var myLatlng = new google.maps.LatLng(parseFloat(place.latitude), parseFloat(place.longitude));
+
+    // create labeled marker
+    var marker = new MarkerWithLabel({
+        position: myLatlng,
+        map: map,
+        labelContent: place.place_name + ", " + place.admin_code1,
+        labelAnchor: new google.maps.Point(25, 0),
+        labelClass: "label",
+        labelStyle: {opacity: 0.75}
+    });
+
+    // load articles in info window upon label click
+    google.maps.event.addListener(marker, 'click', function() 
+        { showInfo(marker, place.place_name + "," + place.admin_code1); });
+
+    // add marker to global markers array
+    markers.push(marker);
 }
+
 
 /**
  * Configures application.
@@ -107,8 +126,8 @@ function configure()
     {
         source: search,
         templates: {
-            empty: "no places found yet",
-            suggestion: _.template("<p><%- place_name %>, <%- admin_name1 %>, <%- postal_code %></p>")
+            empty: "no matches found",
+            suggestion: _.template("<p><%- place_name %>, <%- admin_name1 %></p>")
         }
     });
 
@@ -159,7 +178,16 @@ function hideInfo()
  */
 function removeMarkers()
 {
-    // TODO
+    // iterate through global markers array
+    var len_markers = markers.length;
+    for (var i = 0; i < len_markers; i++)
+    {
+        // remove marker from map
+        markers[i].setMap(null);
+    }
+
+    // empty array
+    markers.length = 0;
 }
 
 /**
